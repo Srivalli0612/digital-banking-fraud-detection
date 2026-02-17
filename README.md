@@ -16,7 +16,7 @@ Maven Build Tool
 
 Simulator (Core Java)
 
-“I used Spring Boot for backend APIs, JPA for ORM mapping, and MySQL for persistence. Fraud detection logic is implemented in Java, and a simulator module generates test transactions.”
+“We used Spring Boot for backend APIs, JPA for ORM mapping, and MySQL for persistence. Fraud detection logic is implemented in Java, and a simulator module generates test transactions.”
 
 
 2. System Architecture
@@ -166,7 +166,7 @@ Rapid Transactions Rule
 
 Suspicious Merchant Rule
 
-“I implemented multiple real-world fraud scenarios. Each rule contributes a weighted risk score.”
+“We implemented multiple real-world fraud scenarios. Each rule contributes a weighted risk score.”
 
 
 10. Example Rule Logic
