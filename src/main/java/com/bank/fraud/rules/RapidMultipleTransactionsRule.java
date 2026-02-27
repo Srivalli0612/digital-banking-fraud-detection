@@ -1,50 +1,55 @@
 package com.bank.fraud.rules;
 
 import com.bank.fraud.model.Transaction;
+import com.bank.fraud.repository.FraudRuleConfigRepository;
 import com.bank.fraud.repository.TransactionRepository;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Component
-public class RapidMultipleTransactionsRule implements FraudRule {
+public class RapidMultipleTransactionsRule extends BaseRule {
 
-	 private final TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
 
-	    public RapidMultipleTransactionsRule(TransactionRepository transactionRepository) {
-	        this.transactionRepository = transactionRepository;
-	    }
-	    
-	    
+    public RapidMultipleTransactionsRule(
+            FraudRuleConfigRepository configRepository,
+            TransactionRepository transactionRepository) {
+        super(configRepository);
+        this.transactionRepository = transactionRepository;
+    }
+
     @Override
-    public boolean evaluate(Transaction transaction) {
+    public BigDecimal evaluate(Transaction transaction) {
 
-        if (transaction.getTransactionTime() == null) {
-            return false;
-        }
+        if (!isActive()) return BigDecimal.ZERO;
 
-    
-        LocalDateTime oneMinuteAgo =
-                transaction.getTransactionTime().minusMinutes(1);
+        BigDecimal threshold = getThreshold();
+        if (threshold == null) return BigDecimal.ZERO;
 
-        List<Transaction> recentTransactions =
-                transactionRepository.findByAccountIdAndTransactionTimeAfter(
-                        transaction.getAccount().getId(),
-                        oneMinuteAgo
+        LocalDateTime fiveMinutesAgo =
+                LocalDateTime.now().minusMinutes(5);
+
+        long recentCount =
+                transactionRepository.countRecentTransactions(
+                        transaction.getSenderAccountNumber(),
+                        fiveMinutesAgo
                 );
 
-        return recentTransactions.size() >= 3; // 3+ transactions within 1 minute
+        BigDecimal recentCountBD =
+                BigDecimal.valueOf(recentCount);
+
+        if (recentCountBD.compareTo(threshold) > 0) {
+            return riskScore();   // return rule weight
+        }
+
+        return BigDecimal.ZERO;
     }
 
     @Override
     public String ruleName() {
-        return "RAPID_MULTIPLE_TX_RULE";
-    }
-
-    @Override
-    public double riskScore() {
-        return 0.9;
+        return "RAPID_MULTIPLE_TRANSACTIONS_RULE";
     }
 }

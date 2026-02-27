@@ -1,29 +1,39 @@
 package com.bank.fraud.rules;
 
-import com.bank.fraud.model.Transaction;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-public class OddHoursRule implements FraudRule {
+import org.springframework.stereotype.Component;
+
+import com.bank.fraud.model.Transaction;
+import com.bank.fraud.repository.FraudRuleConfigRepository;
+
+@Component
+public class OddHoursRule extends BaseRule {
+
+    public OddHoursRule(FraudRuleConfigRepository configRepository) {
+        super(configRepository);
+    }
 
     @Override
-    public boolean evaluate(Transaction transaction) {
+    public BigDecimal evaluate(Transaction transaction) {
 
-        if (transaction.getTransactionTime() == null) {
-            return false;
+        if (!isActive()) return BigDecimal.ZERO;
+
+        LocalDateTime time = transaction.getTransactionTime();
+        if (time == null) return BigDecimal.ZERO;
+
+        int hour = time.getHour();
+
+        if (hour >= 0 && hour <= 5) {
+            return riskScore();   // return rule weight
         }
 
-        int hour = transaction.getTransactionTime().getHour();
-
-        // Between 12 AM and 5 AM
-        return hour >= 0 && hour <= 5;
+        return BigDecimal.ZERO;
     }
 
     @Override
     public String ruleName() {
         return "ODD_HOURS_RULE";
-    }
-
-    @Override
-    public double riskScore() {
-        return 0.5;
     }
 }

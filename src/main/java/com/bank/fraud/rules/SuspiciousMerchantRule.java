@@ -1,34 +1,41 @@
 package com.bank.fraud.rules;
 
 import com.bank.fraud.model.Transaction;
+import com.bank.fraud.repository.FraudRuleConfigRepository;
 
-import java.util.Arrays;
+import java.math.BigDecimal;
 import java.util.List;
 
-public class SuspiciousMerchantRule implements FraudRule {
+import org.springframework.stereotype.Component;
 
-    private static final List<String> BLACKLISTED_MERCHANTS =
-            Arrays.asList("DARKWEB_STORE", "SCAM_PAY", "ILLEGAL_SHOP");
+@Component
+public class SuspiciousMerchantRule extends BaseRule {
+
+    private static final List<String> BLACKLIST =
+            List.of("SCAM_PAY", "DARKWEB_STORE", "ILLEGAL_SHOP");
+
+    public SuspiciousMerchantRule(FraudRuleConfigRepository configRepository) {
+        super(configRepository);
+    }
 
     @Override
-    public boolean evaluate(Transaction transaction) {
+    public BigDecimal evaluate(Transaction transaction) {
 
-        if (transaction.getMerchant() == null) {
-            return false;
+        if (!isActive()) return BigDecimal.ZERO;
+
+        String merchant = transaction.getMerchant();
+
+        if (merchant != null &&
+                BLACKLIST.contains(merchant.toUpperCase())) {
+
+            return riskScore();   // return configured rule weight
         }
 
-        return BLACKLISTED_MERCHANTS.contains(
-                transaction.getMerchant().toUpperCase()
-        );
+        return BigDecimal.ZERO;
     }
 
     @Override
     public String ruleName() {
         return "SUSPICIOUS_MERCHANT_RULE";
-    }
-
-    @Override
-    public double riskScore() {
-        return 0.6;
     }
 }

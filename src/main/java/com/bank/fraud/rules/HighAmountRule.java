@@ -1,24 +1,37 @@
 package com.bank.fraud.rules;
 
+import java.math.BigDecimal;
+
+import org.springframework.stereotype.Component;
+
 import com.bank.fraud.model.Transaction;
+import com.bank.fraud.repository.FraudRuleConfigRepository;
 
-public class HighAmountRule implements FraudRule {
+@Component
+public class HighAmountRule extends BaseRule {
 
-    private static final double THRESHOLD = 75000.0;
+    public HighAmountRule(FraudRuleConfigRepository configRepository) {
+        super(configRepository);
+    }
 
     @Override
-    public boolean evaluate(Transaction transaction) {
-        return transaction.getAmount() != null &&
-               transaction.getAmount() > THRESHOLD;
+    public BigDecimal evaluate(Transaction transaction) {
+
+        if (!isActive()) return BigDecimal.ZERO;
+
+        BigDecimal threshold = getThreshold();
+
+        if (threshold == null) return BigDecimal.ZERO;
+
+        if (transaction.getAmount().compareTo(threshold) > 0) {
+            return riskScore();  // return rule weight
+        }
+
+        return BigDecimal.ZERO;
     }
 
     @Override
     public String ruleName() {
         return "HIGH_AMOUNT_RULE";
-    }
-
-    @Override
-    public double riskScore() {
-        return 0.8;
     }
 }

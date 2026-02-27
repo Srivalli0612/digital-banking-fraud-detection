@@ -1,24 +1,42 @@
 package com.bank.fraud.rules;
 
+import java.math.BigDecimal;
+import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
 import com.bank.fraud.model.Transaction;
+import com.bank.fraud.repository.FraudRuleConfigRepository;
 
-public class ForeignLocationRule implements FraudRule {
+@Component
+public class ForeignLocationRule extends BaseRule {
 
-	@Override
-	public boolean evaluate(Transaction transaction) {
-	    return transaction.getLocation() != null &&
-	           !transaction.getLocation().equalsIgnoreCase("INDIA") &&
-	           transaction.getAmount() > 5000;
-	}
+    private static final Set<String> INDIAN_LOCATIONS =
+            Set.of("INDIA", "KOLKATA", "DELHI", "MUMBAI",
+                   "BANGALORE", "CHENNAI", "HYDERABAD", "PATNA");
 
+    public ForeignLocationRule(FraudRuleConfigRepository configRepository) {
+        super(configRepository);
+    }
+
+    @Override
+    public BigDecimal evaluate(Transaction transaction) {
+
+        if (!isActive()) return BigDecimal.ZERO;
+
+        String location = transaction.getLocation();
+
+        if (location == null ||
+                !INDIAN_LOCATIONS.contains(location.toUpperCase())) {
+
+            return riskScore();   // return rule weight
+        }
+
+        return BigDecimal.ZERO;
+    }
 
     @Override
     public String ruleName() {
         return "FOREIGN_LOCATION_RULE";
-    }
-
-    @Override
-    public double riskScore() {
-        return 0.7;
     }
 }

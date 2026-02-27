@@ -1,11 +1,28 @@
 package com.bank.fraud.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import jakarta.validation.constraints.*;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions",
+       indexes = {
+           @Index(name = "idx_sender_account", columnList = "senderAccountNumber"),
+           @Index(name = "idx_transaction_time", columnList = "transactionTime"),
+           @Index(name = "idx_fraud_flag", columnList = "fraudFlag")
+       })
+@EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Transaction {
 
     @Id
@@ -13,145 +30,58 @@ public class Transaction {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    @NotBlank(message = "Transaction ID is required")
     private String transactionId;
 
-    @NotNull(message = "Account must be provided")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @Column(nullable = false)
-    @NotNull(message = "Amount cannot be null")
-    @Positive(message = "Amount must be greater than zero")
-    private Double amount;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal amount;
 
     @Column(nullable = false)
-    @NotBlank(message = "Transaction type is required")
     private String transactionType;
-    // ONLINE, ATM, POS
 
     @Column(nullable = false)
-    @NotBlank(message = "Location is required")
     private String location;
 
     @Column(nullable = false)
-    @NotBlank(message = "Device ID is required")
     private String deviceId;
-    
+
     @Column(nullable = false)
-    @NotBlank(message = "Merchant is required")
     private String merchant;
-
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime transactionTime;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    
+    @Column(nullable = false)
+    private String senderName;
+    
+    @Column(nullable = false)
+    private String receiverName;
 
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private String senderAccountNumber;
 
-    @PrePersist
-    public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        transactionTime = now;
-        createdAt = now;
-        updatedAt = now;
-    }
+    @Column(nullable = false)
+    private String receiverAccountNumber;
 
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
- 
-    
-    // 🔹 For ML & rule-engine labeling
+    @Column(nullable = false)
+    private String ipAddress;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
+
     @Column(nullable = false)
     private Boolean fraudFlag = false;
 
-    // -------- Constructors --------
-    public Transaction() {
-       
-    }
+    @Column(nullable = false)
+    private LocalDateTime transactionTime;
 
-    // -------- Getters & Setters --------
-    public Long getId() {
-        return id;
-    }
+    @CreatedDate
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
-    public String getTransactionId() {
-        return transactionId;
-    }
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
-
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
-    }
-    
-    public String getMerchant() {
-        return merchant;
-    }
-
-    public void setMerchant(String merchant) {
-        this.merchant = merchant;
-    }
-
-
-    public LocalDateTime getTransactionTime() {
-        return transactionTime;
-    }
-
-    public Boolean getFraudFlag() {
-        return fraudFlag;
-    }
-
-    public void setFraudFlag(Boolean fraudFlag) {
-        this.fraudFlag = fraudFlag;
-    }
-
-	public void setTransactionTime(LocalDateTime transactionTime2) {
-		 this.transactionTime = transactionTime2;
-	}
-    
+    @Version
+    private Long version;
 }

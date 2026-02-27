@@ -1,6 +1,12 @@
 package com.bank.fraud.rules;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RuleEvaluationStats {
+
+    // ✅ Added Logger
+    private static final Logger log = LoggerFactory.getLogger(RuleEvaluationStats.class);
 
     private int totalTransactions;
     private int fraudDetected;
@@ -19,16 +25,19 @@ public class RuleEvaluationStats {
     }
 
     public void printSummary() {
-        System.out.println("===== FRAUD RULE EVALUATION =====");
-        System.out.println("Total Transactions : " + totalTransactions);
-        System.out.println("Fraud Detected     : " + fraudDetected);
-        System.out.println("Normal             : " + normalTransactions);
+        // ✅ Replaced System.out with structured log messages
+        log.info("===== FRAUD RULE EVALUATION SUMMARY =====");
+        log.info("Total Transactions : {}", totalTransactions);
+        log.info("Fraud Detected     : {}", fraudDetected);
+        log.info("Normal             : {}", normalTransactions);
+
         if (totalTransactions > 0) {
-            System.out.println("Fraud Rate (%)     : " +
-                    ((double) fraudDetected / totalTransactions) * 100);
+            double fraudRate = ((double) fraudDetected / totalTransactions) * 100;
+            log.info("Fraud Rate (%)     : {}%", String.format("%.2f", fraudRate));
         } else {
-            System.out.println("Fraud Rate (%)     : 0");
+            log.info("Fraud Rate (%)     : 0%");
         }
-        System.out.println("================================");
+        
+        log.info("========================================");
     }
 }
