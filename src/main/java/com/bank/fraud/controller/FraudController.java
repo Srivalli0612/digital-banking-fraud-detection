@@ -1,7 +1,8 @@
 package com.bank.fraud.controller;
 
-import com.bank.fraud.model.FraudResult;
-import com.bank.fraud.model.Transaction;
+import com.bank.fraud.dto.ApiResponse;
+import com.bank.fraud.dto.TransactionRequestDTO;
+import com.bank.fraud.dto.TransactionResponseDTO;
 import com.bank.fraud.service.FraudDetectionService;
 
 import jakarta.validation.Valid;
@@ -21,11 +22,20 @@ public class FraudController {
     private FraudDetectionService fraudDetectionService;
 
     @PostMapping("/transactions")
-    public ResponseEntity<FraudResult> createTransaction(@Valid @RequestBody Transaction transaction) {
+    public ResponseEntity<ApiResponse<TransactionResponseDTO>> createTransaction(
+            @Valid @RequestBody TransactionRequestDTO requestDTO) {
 
-        FraudResult result = fraudDetectionService.processTransaction(transaction);
+        TransactionResponseDTO response =
+                fraudDetectionService.processTransaction(requestDTO);
 
-        return ResponseEntity.ok(result);
+        ApiResponse<TransactionResponseDTO> apiResponse =
+                new ApiResponse<>(
+                        "SUCCESS",
+                        "Transaction processed successfully",
+                        response
+                );
+
+        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/summary")
