@@ -16,4 +16,4 @@ public class FraudAlertStatsDTO {
     private long todayAlerts;
     
     private Map<RiskLevel, Long> riskBreakdown;
-}
+} 

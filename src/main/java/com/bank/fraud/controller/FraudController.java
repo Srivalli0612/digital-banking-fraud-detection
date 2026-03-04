@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/fraud")
-public class FraudController {
+public class FraudController { 
 
     @Autowired
     private FraudDetectionService fraudDetectionService;

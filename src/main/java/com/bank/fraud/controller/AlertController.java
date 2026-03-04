@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/alerts")
-public class AlertController {
+public class AlertController { 
 
     private final FraudDetectionService fraudDetectionService;
     private final FraudAlertService fraudAlertService;

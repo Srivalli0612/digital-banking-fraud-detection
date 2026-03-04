@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class TransactionResponseDTO {
-
+ 
     private String transactionId;
     private BigDecimal amount;
     private Boolean fraudDetected;

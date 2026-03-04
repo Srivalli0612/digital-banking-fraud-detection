@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MLResponseDTO {
+public class MLResponseDTO { 
 
     private BigDecimal fraudProbability;
 

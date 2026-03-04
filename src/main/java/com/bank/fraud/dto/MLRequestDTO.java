@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MLRequestDTO {
+public class MLRequestDTO { 
 
     private BigDecimal amount;
     private int hour;
