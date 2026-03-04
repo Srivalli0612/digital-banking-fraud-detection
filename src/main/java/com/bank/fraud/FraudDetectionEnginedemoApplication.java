@@ -22,5 +22,5 @@ public class FraudDetectionEnginedemoApplication {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
-    }  
+    }   
 }
