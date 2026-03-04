@@ -1,7 +1,6 @@
 package com.bank.fraud.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -73,6 +72,7 @@ public class Transaction {
     private Boolean fraudFlag = false;
 
     @Column(nullable = false)
+    @CreatedDate
     private LocalDateTime transactionTime;
 
     @CreatedDate
@@ -83,5 +83,5 @@ public class Transaction {
     private LocalDateTime updatedAt;
 
     @Version
-    private Long version;
+    private Long version = 0L;
 }

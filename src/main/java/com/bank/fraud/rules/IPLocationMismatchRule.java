@@ -5,13 +5,13 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
 import com.bank.fraud.model.Transaction;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 @Component
 public class IPLocationMismatchRule extends BaseRule {
 
-    public IPLocationMismatchRule(FraudRuleConfigRepository configRepository) {
-        super(configRepository);
+    public IPLocationMismatchRule(FraudRuleConfigService configService) {
+        super(configService);
     }
 
     @Override

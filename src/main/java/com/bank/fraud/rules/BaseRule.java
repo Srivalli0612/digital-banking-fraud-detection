@@ -1,22 +1,20 @@
 package com.bank.fraud.rules;
 
 import com.bank.fraud.model.FraudRuleConfig;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 import java.math.BigDecimal;
 
 public abstract class BaseRule implements FraudRule {
 
-    protected final FraudRuleConfigRepository configRepository;
+    protected final FraudRuleConfigService configService;
 
-    public BaseRule(FraudRuleConfigRepository configRepository) {
-        this.configRepository = configRepository;
+    public BaseRule(FraudRuleConfigService configService) {
+        this.configService = configService;
     }
 
     protected FraudRuleConfig getConfig() {
-        return configRepository
-                .findByRuleName(ruleName())
-                .orElse(null);
+        return configService.getByRuleName(ruleName());
     }
 
     protected boolean isActive() {

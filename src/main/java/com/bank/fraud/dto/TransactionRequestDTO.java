@@ -5,16 +5,21 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.*;
 
 public class TransactionRequestDTO {
 
-    @NotBlank@NotBlank(message = "Transaction ID is required")
+    @NotBlank(message = "Transaction ID is required")
     private String transactionId;
 
-    @NotBlank(message = "Account Number is required")
+    @NotBlank(message = "Sender Account Number is required")
     @Pattern(regexp = "ACC\\d+", message = "Account number must start with ACC")
-    private String accountNumber;
+    private String senderAccountNumber;
+
+    @NotBlank(message = "Receiver Account Number is required")
+    @Pattern(regexp = "ACC\\d+", message = "Account number must start with ACC")
+    private String receiverAccountNumber;
 
 	@NotNull(message = "Amount is required")
     @Positive(message = "Amount must be greater than 0")
@@ -38,22 +43,17 @@ public class TransactionRequestDTO {
     @NotBlank(message = "Receiver name is required")
     private String receiverName;
     
-    @NotBlank(message = "Sender Account Number is required")
-    private String senderAccountNumber;
-
-    @NotBlank(message = "Receiver Account Number is required")
-    private String receiverAccountNumber;
-
+ 
     @NotBlank(message = "IP Address is required")
     private String ipAddress;
 
     @NotBlank(message = "Status is required")
     private String status;
     
-    @NotNull(message = "Transaction time is required")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime transactionTime;
-    
+//    @NotNull(message = "Transaction time is required")
+//    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+//    private LocalDateTime transactionTime;
+        
     
     // Getters & Setters
 
@@ -81,14 +81,7 @@ public class TransactionRequestDTO {
 		this.receiverName = receiverName;
 	}
 	
-	public String getAccountNumber() {
-		return accountNumber;
-	}
-
-	public void setAccountNumber(String accountNumber) {
-		this.accountNumber = accountNumber;
-	}
-
+	
 	public BigDecimal getAmount() {
 		return amount;
 	}
@@ -161,12 +154,12 @@ public class TransactionRequestDTO {
 		this.status = status;
 	}
     
-	public LocalDateTime getTransactionTime() {
-		return transactionTime;
-	}
-
-	public void setTransactionTime(LocalDateTime transactionTime) {
-		this.transactionTime = transactionTime;
-	}
+//	public LocalDateTime getTransactionTime() {
+//		return transactionTime;
+//	}
+//
+//	public void setTransactionTime(LocalDateTime transactionTime) {
+//		this.transactionTime = transactionTime;
+//	}
     
 }

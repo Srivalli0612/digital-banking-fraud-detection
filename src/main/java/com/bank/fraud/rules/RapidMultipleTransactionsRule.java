@@ -3,6 +3,7 @@ package com.bank.fraud.rules;
 import com.bank.fraud.model.Transaction;
 import com.bank.fraud.repository.FraudRuleConfigRepository;
 import com.bank.fraud.repository.TransactionRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 import org.springframework.stereotype.Component;
 
@@ -15,9 +16,9 @@ public class RapidMultipleTransactionsRule extends BaseRule {
     private final TransactionRepository transactionRepository;
 
     public RapidMultipleTransactionsRule(
-            FraudRuleConfigRepository configRepository,
+    		FraudRuleConfigService configService,
             TransactionRepository transactionRepository) {
-        super(configRepository);
+        super(configService);
         this.transactionRepository = transactionRepository;
     }
 

@@ -1,8 +1,9 @@
 package com.bank.fraud.rules;
 
 import com.bank.fraud.model.Transaction;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
 import com.bank.fraud.repository.TransactionRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
+
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -14,9 +15,9 @@ public class MultipleFailedAttemptsRule extends BaseRule {
     private final TransactionRepository transactionRepository;
 
     public MultipleFailedAttemptsRule(
-            FraudRuleConfigRepository configRepository,
+    		FraudRuleConfigService configService,
             TransactionRepository transactionRepository) {
-        super(configRepository);
+        super(configService);
         this.transactionRepository = transactionRepository;
     }
 

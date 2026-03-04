@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.bank.fraud.model.Transaction;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 @Component
 public class SuspiciousIPRule extends BaseRule {
@@ -14,8 +14,8 @@ public class SuspiciousIPRule extends BaseRule {
     private static final List<String> BLACKLISTED_IPS =
             List.of("192.168.0.10", "10.0.0.66", "172.16.0.5");
 
-    public SuspiciousIPRule(FraudRuleConfigRepository configRepository) {
-        super(configRepository);
+    public SuspiciousIPRule(FraudRuleConfigService configService) {
+        super(configService);
     }
 
     @Override

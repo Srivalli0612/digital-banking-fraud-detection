@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.bank.fraud.model.Transaction;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 @Component
 public class ForeignLocationRule extends BaseRule {
@@ -15,8 +15,8 @@ public class ForeignLocationRule extends BaseRule {
             Set.of("INDIA", "KOLKATA", "DELHI", "MUMBAI",
                    "BANGALORE", "CHENNAI", "HYDERABAD", "PATNA");
 
-    public ForeignLocationRule(FraudRuleConfigRepository configRepository) {
-        super(configRepository);
+    public ForeignLocationRule(FraudRuleConfigService configService) {
+        super(configService);
     }
 
     @Override

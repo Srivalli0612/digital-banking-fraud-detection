@@ -1,48 +1,57 @@
 package com.bank.fraud.rules;
 
 import com.bank.fraud.model.*;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class RuleEngineTest {
+public class RuleEngineTest {
 
     private RuleEngine ruleEngine;
-    private FraudRuleConfigRepository configRepository;
+    private FraudRuleConfigService configService;
 
     @BeforeEach
     void setup() {
 
-        configRepository = mock(FraudRuleConfigRepository.class);
+        configService = mock(FraudRuleConfigService.class);
 
-        // Mock global threshold
-        FraudRuleConfig config = new FraudRuleConfig();
-        config.setThresholdValue(new BigDecimal("0.5"));
+        // -------------------------------
+        // Mock active rule config
+        // -------------------------------
+        FraudRuleConfig activeRuleConfig = new FraudRuleConfig();
+        activeRuleConfig.setActive(true);
+        activeRuleConfig.setWeight(BigDecimal.ONE);
+        activeRuleConfig.setThresholdValue(new BigDecimal("100000"));
 
-        when(configRepository.findByRuleName("GLOBAL_FRAUD_THRESHOLD"))
-                .thenReturn(Optional.of(config));
+        when(configService.getByRuleName(anyString()))
+                .thenReturn(activeRuleConfig);
 
+        // -------------------------------
+        // Create rules list
+        // -------------------------------
         List<FraudRule> rules = List.of(
-                new HighAmountRule(configRepository),
-                new ForeignLocationRule(configRepository),
-                new SelfTransferRule(configRepository),
-                new SuspiciousIPRule(configRepository),
-                new SuspiciousMerchantRule(configRepository),
-                new OddHoursRule(configRepository)
+                new HighAmountRule(configService),
+                new ForeignLocationRule(configService),
+                new SelfTransferRule(configService),
+                new SuspiciousIPRule(configService),
+                new SuspiciousMerchantRule(configService),
+                new OddHoursRule(configService)
         );
 
-        ruleEngine = new RuleEngine(rules, configRepository);
+        ruleEngine = new RuleEngine(rules);
     }
 
+    // ---------------------------------------
+    // Base Transaction (Normal)
+    // ---------------------------------------
     private Transaction baseTransaction() {
         Transaction tx = new Transaction();
         tx.setAmount(new BigDecimal("1000"));
@@ -56,108 +65,112 @@ class RuleEngineTest {
         return tx;
     }
 
-    // --------------------------------------------
-    // HIGH AMOUNT RULE
-    // --------------------------------------------
-
+    // ---------------------------------------
+    // HIGH AMOUNT
+    // ---------------------------------------
     @Test
     void shouldTriggerHighAmountRule() {
 
         Transaction tx = baseTransaction();
         tx.setAmount(new BigDecimal("500000"));
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertTrue(result.getFraudDetected());
-        assertTrue(result.getRuleTriggered().contains("HIGH_AMOUNT_RULE"));
+        assertTrue(result.getNormalizedScore()
+                .compareTo(BigDecimal.ZERO) > 0);
+
+        assertTrue(result.getTriggeredRules()
+                .contains("HIGH_AMOUNT_RULE"));
     }
 
-    // --------------------------------------------
-    // FOREIGN LOCATION RULE
-    // --------------------------------------------
-
+    // ---------------------------------------
+    // FOREIGN LOCATION
+    // ---------------------------------------
     @Test
     void shouldTriggerForeignLocationRule() {
 
         Transaction tx = baseTransaction();
         tx.setLocation("USA");
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertTrue(result.getRuleTriggered().contains("FOREIGN_LOCATION_RULE"));
+        assertTrue(result.getTriggeredRules()
+                .contains("FOREIGN_LOCATION_RULE"));
     }
 
-    // --------------------------------------------
-    // SELF TRANSFER RULE
-    // --------------------------------------------
-
+    // ---------------------------------------
+    // SELF TRANSFER
+    // ---------------------------------------
     @Test
     void shouldTriggerSelfTransferRule() {
 
         Transaction tx = baseTransaction();
         tx.setReceiverAccountNumber("ACC1");
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertTrue(result.getRuleTriggered().contains("SELF_TRANSFER_RULE"));
+        assertTrue(result.getTriggeredRules()
+                .contains("SELF_TRANSFER_RULE"));
     }
 
-    // --------------------------------------------
-    // SUSPICIOUS IP RULE
-    // --------------------------------------------
-
+    // ---------------------------------------
+    // SUSPICIOUS IP
+    // ---------------------------------------
     @Test
     void shouldTriggerSuspiciousIPRule() {
 
         Transaction tx = baseTransaction();
         tx.setIpAddress("10.0.0.66");
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertTrue(result.getRuleTriggered().contains("SUSPICIOUS_IP_RULE"));
+        assertTrue(result.getTriggeredRules()
+                .contains("SUSPICIOUS_IP_RULE"));
     }
 
-    // --------------------------------------------
-    // SUSPICIOUS MERCHANT RULE
-    // --------------------------------------------
-
+    // ---------------------------------------
+    // SUSPICIOUS MERCHANT
+    // ---------------------------------------
     @Test
     void shouldTriggerSuspiciousMerchantRule() {
 
         Transaction tx = baseTransaction();
         tx.setMerchant("SCAM_PAY");
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertTrue(result.getRuleTriggered().contains("SUSPICIOUS_MERCHANT_RULE"));
+        assertTrue(result.getTriggeredRules()
+                .contains("SUSPICIOUS_MERCHANT_RULE"));
     }
 
-    // --------------------------------------------
-    // ODD HOURS RULE
-    // --------------------------------------------
-
+    // ---------------------------------------
+    // ODD HOURS
+    // ---------------------------------------
     @Test
     void shouldTriggerOddHoursRule() {
 
         Transaction tx = baseTransaction();
         tx.setTransactionTime(LocalDateTime.now().withHour(2));
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertTrue(result.getRuleTriggered().contains("ODD_HOURS_RULE"));
+        assertTrue(result.getTriggeredRules()
+                .contains("ODD_HOURS_RULE"));
     }
 
-    // --------------------------------------------
+    // ---------------------------------------
     // NORMAL TRANSACTION
-    // --------------------------------------------
-
+    // ---------------------------------------
     @Test
     void shouldNotTriggerFraudForNormalTransaction() {
 
         Transaction tx = baseTransaction();
 
-        FraudResult result = ruleEngine.evaluate(tx);
+        RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
-        assertFalse(result.getFraudDetected());
+        assertEquals(BigDecimal.ZERO.setScale(4),
+                result.getNormalizedScore());
+
+        assertTrue(result.getTriggeredRules().isEmpty());
     }
 }

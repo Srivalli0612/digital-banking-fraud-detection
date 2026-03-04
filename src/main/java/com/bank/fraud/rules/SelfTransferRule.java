@@ -5,13 +5,13 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 
 import com.bank.fraud.model.Transaction;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 @Component
 public class SelfTransferRule extends BaseRule {
 
-    public SelfTransferRule(FraudRuleConfigRepository configRepository) {
-        super(configRepository);
+    public SelfTransferRule(FraudRuleConfigService configService) {
+        super(configService);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.bank.fraud.simulator;
 
 import com.bank.fraud.model.*;
 import com.bank.fraud.rules.RuleEngine;
+import com.bank.fraud.rules.RuleEvaluationResult;
 import com.bank.fraud.rules.RuleEvaluationStats;
 
 import org.slf4j.Logger;
@@ -41,20 +42,36 @@ public class FraudSimulationRunner implements CommandLineRunner {
         for (int i = 1; i <= 20; i++) {
 
             Transaction tx = generator.generate(account);
-            FraudResult result = ruleEngine.evaluate(tx);
+            RuleEvaluationResult result = ruleEngine.evaluate(tx);
 
             stats.incrementTotal();
+            
+            BigDecimal score = result.getNormalizedScore();
+            
+            RiskLevel riskLevel = calculateRiskLevel(score);
+            
+            //Fraud Decision or fraud flag
+            boolean isFraud = riskLevel == RiskLevel.HIGH_RISK
+                    || riskLevel == RiskLevel.CRITICAL_RISK;
 
-            if (result.getFraudDetected()) {
+            // Map riskLevel to priority
+            AlertPriority priority = mapPriority(riskLevel);
+            
+            
+//            // Decide fraud threshold for simulation
+//            boolean isFraud = score.compareTo(new BigDecimal("0.6")) >= 0;
+
+            if (isFraud) {
                 stats.incrementFraud();
-                // ✅ Using log.warn for detected fraud
-                log.warn("FRAUD DETECTED - Tx #{}: Amount: {}, Rules: {}", 
-                    i, tx.getAmount(), result.getRuleTriggered());
+                log.warn("FRAUD DETECTED - Tx #{}: Amount: {}, Rules: {}, Score: {}",
+                        i, tx.getAmount(),
+                        result.getTriggeredRules(),
+                        score);
             } else {
                 stats.incrementNormal();
-                // ✅ Using log.info for regular transactions
-                log.info("Normal Transaction - Tx #{}: Amount: {}, Score: {}", 
-                    i, tx.getAmount(), result.getRiskScore());
+                log.info("Normal Transaction - Tx #{}: Amount: {}, Score: {}",
+                        i, tx.getAmount(),
+                        score);
             }
 
             // ✅ Structured logging for the full transaction details
@@ -75,6 +92,9 @@ public class FraudSimulationRunner implements CommandLineRunner {
             log.info("Transaction Time: {}", tx.getTransactionTime());
             log.info("Merchant: {}", tx.getMerchant());
             log.info("Location: {}", tx.getLocation());
+            log.info("Risk Level: {}", riskLevel);
+
+            
             
             
             log.info("\n");
@@ -86,5 +106,32 @@ public class FraudSimulationRunner implements CommandLineRunner {
         log.info("Simulation completed.");
         
         stats.printSummary(); 
+    }
+    
+    private RiskLevel calculateRiskLevel(BigDecimal score) {
+        if (score.compareTo(new BigDecimal("0.3")) < 0) {
+            return RiskLevel.LOW_RISK;
+        } else if (score.compareTo(new BigDecimal("0.6")) < 0) {
+            return RiskLevel.MEDIUM_RISK;
+        } else if (score.compareTo(new BigDecimal("0.8")) < 0) {
+            return RiskLevel.HIGH_RISK;
+        } else {
+            return RiskLevel.CRITICAL_RISK;
+        }
+    }
+    
+    private AlertPriority mapPriority(RiskLevel level) {
+        switch (level) {
+            case LOW_RISK:
+                return AlertPriority.LOW;
+            case MEDIUM_RISK:
+                return AlertPriority.MEDIUM;
+            case HIGH_RISK:
+                return AlertPriority.HIGH;
+            case CRITICAL_RISK:
+                return AlertPriority.CRITICAL;
+            default:
+                return AlertPriority.LOW;
+        }
     }
 }

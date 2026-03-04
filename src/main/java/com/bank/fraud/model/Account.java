@@ -54,5 +54,13 @@ public class Account {
     private LocalDateTime updatedAt;
 
     @Version
-    private Long version;
+    private Long version = 0L;
+    
+    public void withdrawlMoney(BigDecimal amount) {
+    	this.balance = balance.subtract(amount);
+    }
+    
+    public void depositMoney(BigDecimal deposit) {
+    	this.balance = balance.add(deposit);
+    }
 }

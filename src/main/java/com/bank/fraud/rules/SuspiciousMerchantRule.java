@@ -1,7 +1,7 @@
 package com.bank.fraud.rules;
 
 import com.bank.fraud.model.Transaction;
-import com.bank.fraud.repository.FraudRuleConfigRepository;
+import com.bank.fraud.service.FraudRuleConfigService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,8 +14,8 @@ public class SuspiciousMerchantRule extends BaseRule {
     private static final List<String> BLACKLIST =
             List.of("SCAM_PAY", "DARKWEB_STORE", "ILLEGAL_SHOP");
 
-    public SuspiciousMerchantRule(FraudRuleConfigRepository configRepository) {
-        super(configRepository);
+    public SuspiciousMerchantRule(FraudRuleConfigService configService) {
+        super(configService);
     }
 
     @Override
