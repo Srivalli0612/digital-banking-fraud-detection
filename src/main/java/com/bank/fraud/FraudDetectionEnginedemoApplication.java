@@ -19,7 +19,7 @@ public class FraudDetectionEnginedemoApplication {
     }
     
   //Add this to allow FraudDetectionService to make HTTP requests
-    @Bean
+    @Bean 
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }   
