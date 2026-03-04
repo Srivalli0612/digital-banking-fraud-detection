@@ -23,4 +23,4 @@ public class FraudDetectionEnginedemoApplication {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }   
-}
+} 
