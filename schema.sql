@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
   ifsc_code VARCHAR(20),
   branch_name VARCHAR(255),
   is_admin TINYINT(1) NOT NULL DEFAULT 0,
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
